@@ -78,6 +78,11 @@ jobs:
       working-directory: ./openwrt
       run: |
         ./scripts/feeds update -a
+        cp -f feeds/smpackage/.github/diy/default-settings package/emortal/default-settings/files/99-default-settings
+        cp -f feeds/smpackage/.github/diy/banner package/emortal/default-settings/files/openwrt_banner
+        cp -f feeds/smpackage/.github/diy/banner package/base-files/files/etc/banner
+        cp -f feeds/smpackage/.github/diy/index_x86.htm package/emortal/autocore/files/generic/index.htm
+        sed -i "s/%D %V, %C/openwrt $(date +'%m.%d')/g" package/base-files/files/etc/banner
         ./scripts/feeds install -a   
         
     - name: 自定义配置 ${{matrix.target}}
@@ -86,11 +91,6 @@ jobs:
       run: |
         [ -e $CONFIG_FILE ] && mv $CONFIG_FILE openwrt/.config
         chmod +x ./customize.sh && ./customize.sh
-        cp -f openwrt/feeds/smpackage/.github/diy/default-settings openwrt/package/emortal/default-settings/files/99-default-settings
-        cp -f openwrt/feeds/smpackage/.github/diy/banner openwrt/package/emortal/default-settings/files/openwrt_banner
-        cp -f openwrt/feeds/smpackage/.github/diy/banner openwrt/package/base-files/files/etc/banner
-        cp -f openwrt/feeds/smpackage/.github/diy/index_x86.htm openwrt/package/emortal/autocore/files/generic/index.htm
-        sed -i "s/%D %V, %C/openwrt $(date +'%m.%d')/g" openwrt/package/base-files/files/etc/banner
         make defconfig
         
     - name: 下载包文件
