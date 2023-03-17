@@ -99,7 +99,7 @@ jobs:
         sed -i "s/%D %V, %C/openwrt $(date +'%m.%d')/g" package/base-files/files/etc/banner
         make defconfig
         
-    - name: 自定义lean配置
+    - name: 配置lean
       if: ${{matrix.target}} == 'lean'
       env:
         REPO_URL: https://github.com/coolsnowwolf/lede
