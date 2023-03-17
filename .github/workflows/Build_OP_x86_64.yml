@@ -1,0 +1,124 @@
+# 
+# <https://github.com/KFERMercer/OpenWrt-CI>
+#
+# Copyright (C) 2019 P3TERX
+#
+# Copyright (C) 2020 KFERMercer
+#
+
+name: Build_x86_64
+
+on: 
+  workflow_dispatch:
+  release:
+    types: [published]
+    
+  schedule:
+    - cron: 0 6 * * 5
+
+  #push:
+  #  branches: 
+  #    - master
+
+
+  
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Initialization environment
+      env:
+        DEBIAN_FRONTEND: noninteractive
+      run: |
+          docker rmi `docker images -q`
+          sudo -E rm -rf /usr/share/dotnet /etc/mysql /etc/php /etc/apt/sources.list.d /usr/local/lib/android
+          sudo -E apt-mark hold grub-efi-amd64-signed
+          sudo -E apt update
+          sudo -E apt -y purge azure-cli* docker* ghc* zulu* llvm* firefox google* dotnet* powershell* openjdk* mysql* php* mongodb* dotnet* moby* snap*
+          sudo -E apt -y full-upgrade
+          sudo -E apt -y install ack antlr3 aria2 asciidoc autoconf automake autopoint binutils bison build-essential bzip2 ccache cmake cpio curl device-tree-compiler fastjar flex gawk gettext gcc-multilib g++-multilib git gperf haveged help2man intltool libc6-dev-i386 libelf-dev libglib2.0-dev libgmp3-dev libltdl-dev libmpc-dev libmpfr-dev libncurses5-dev libncursesw5-dev libreadline-dev libssl-dev libtool lrzsz mkisofs msmtp nano ninja-build p7zip p7zip-full patch pkgconf python3 python3-pip libpython3-dev qemu-utils rsync scons squashfs-tools subversion swig texinfo uglifyjs upx-ucl unzip vim wget xmlto xxd zlib1g-dev
+          sudo -E systemctl daemon-reload
+          sudo -E apt -y autoremove --purge
+          sudo -E apt clean
+          sudo -E timedatectl set-timezone "Asia/Shanghai"
+          
+    - name: Checkout
+      uses: actions/checkout@master
+
+    - name: Clone source code
+      env: 
+        REPO_URL: https://github.com/coolsnowwolf/lede
+        REPO_BRANCH: master
+      run: |
+        git clone --depth 1 $REPO_URL -b $REPO_BRANCH openwrt
+        cd openwrt   
+        echo "src-git small8 https://github.com/kenzok8/small-package" >> ./feeds.conf.default
+     #  sed -i 's/#src-git helloworld/src-git helloworld/g' ./feeds.conf.default
+        
+    - name: Update & Install feeds
+      working-directory: ./openwrt
+      run: |
+        ./scripts/feeds update -a
+        rm -rf feeds/small8/luci-theme-argon/
+        rm -rf feeds/small8/luci-theme-argonne/
+        rm -rf feeds/small8/luci-app-argon-config/
+        rm -rf feeds/small8/luci-app-argonne-config/
+        rm -rf feeds/small8/luci-app-kodexplorer/
+        rm -rf feeds/luci/theme/luci-theme-argon/
+        rm -rf feeds/luci/theme/luci-theme-argon-mod/
+        rm -rf feeds/luci/theme/luci-theme-material/
+        rm -rf feeds/luci/theme/luci-theme-netgear/
+        ./scripts/feeds install -a
+        git clone -b 18.06 https://github.com/jerrykuku/luci-theme-argon.git package/feeds/luci-theme-argon
+        
+    #- name: Import external feeds - passwall
+    #  working-directory: ./openwrt
+    #  run: |
+    #    git clone https://github.com/xiaorouji/openwrt-passwall.git package/lienol
+    #    git clone "your_github_link" package/"your_folder_name"      
+
+    #- name: Import external feeds - JerryKuKu Argon
+    #  working-directory: ./openwrt
+    #  run: |
+    #    git clone -b 18.06 https://github.com/jerrykuku/luci-theme-argon.git package/luci-theme-argon-jerrykuku
+
+    - name: Configuration Customization - Build_x86_64
+      env:
+        CONFIG_FILE: 'x86_64.config'
+      run: |
+        [ -e $CONFIG_FILE ] && mv $CONFIG_FILE openwrt/.config
+        chmod +x ./customize_x86_64.sh && ./customize_x86_64.sh
+        cd openwrt && make defconfig
+        
+    - name: Download package
+      working-directory: ./openwrt
+      run: |
+        make download -j16
+
+    - name: Build firmware
+      working-directory: ./openwrt
+      run: |
+        echo -e "$(nproc) thread build."
+        make -j$(nproc) || make -j1 V=s
+        echo "======================="
+        echo "Space usage:"
+        echo "======================="
+        df -h
+        echo "======================="
+        du -h --max-depth=1 ./ --exclude=build_dir --exclude=bin
+        du -h --max-depth=1 ./build_dir
+        du -h --max-depth=1 ./bin
+        echo "======================="
+        echo "Prepare artifact"
+        echo "======================="
+        mkdir -p artifact/package
+        rm -rf $(find bin/targets/ -type d -name "packages")
+        cp -rf $(find bin/packages/ -type f -name "*.ipk") artifact/package/
+        cp -rf bin/targets/ artifact/
+
+    - name : Upload artifact
+      uses: actions/upload-artifact@master
+      with:
+        name: OpenWrt
+        path: openwrt/artifact/
