@@ -68,7 +68,7 @@ jobs:
         VERSION="$(echo "${{github.event.action}}" | grep -Eo " [0-9.]+" | sed -e 's/ //')" || true
         [ "$VERSION" ] && echo "VERSION=$VERSION" >> $GITHUB_ENV || echo "VERSION=$(date +'%m.%d')" >> $GITHUB_ENV         
            
-    - name: 配置ctc_18.06
+    - name: ctc_18.06
       env:
         REPO_URL: https://github.com/immortalwrt/immortalwrt
         REPO_BRANCH: openwrt-18.06-k5.4
@@ -100,7 +100,7 @@ jobs:
         sed -i "s/%D %V, %C/openwrt $(date +'%m.%d')/g" package/base-files/files/etc/banner
         make defconfig
         
-    - name: 配置lean
+    - name: lean
       if: matrix.target == 'lean'
       env:
         REPO_URL: https://github.com/coolsnowwolf/lede
@@ -133,7 +133,7 @@ jobs:
         find dl -size -1024c -exec rm -f {} \;
 
     - name: 设置缓存
-      if: ${{matrix.target}} == 'ctc_18.06'
+      if: matrix.target == 'ctc_18.06'
       uses: klever1988/cachewrtbuild@main
       with:
         ccache: 'true'
