@@ -69,11 +69,11 @@ jobs:
         [ "$VERSION" ] && echo "VERSION=$VERSION" >> $GITHUB_ENV || echo "VERSION=$(date +'%m.%d')" >> $GITHUB_ENV         
            
     - name: 配置ctc_18.06
-      if: ${{matrix.target}} == 'ctc_18.06'
       env:
         REPO_URL: https://github.com/immortalwrt/immortalwrt
         REPO_BRANCH: openwrt-18.06-k5.4
         CONFIG_FILE: 'ctc_18.06.config'
+      if: matrix.target == 'ctc_18.06'
       run: |
         echo "======================="
         echo "Clone source code"
@@ -89,6 +89,7 @@ jobs:
         echo "======================="
         echo "Configuration Customization ${{matrix.target}}"
         echo "-----------------------"
+        cd ..
         [ -e $CONFIG_FILE ] && mv $CONFIG_FILE openwrt/.config
         chmod +x ./customize.sh && ./customize.sh
         cd openwrt
@@ -100,7 +101,7 @@ jobs:
         make defconfig
         
     - name: 配置lean
-      if: ${{matrix.target}} == 'lean'
+      if: matrix.target == 'lean'
       env:
         REPO_URL: https://github.com/coolsnowwolf/lede
         REPO_BRANCH: master
@@ -120,6 +121,7 @@ jobs:
         echo "======================="
         echo "Configuration Customization ${{matrix.target}}"
         echo "-----------------------"
+        cd ..
         [ -e $CONFIG_FILE ] && mv $CONFIG_FILE openwrt/.config
         chmod +x ./customize.sh && ./customize.sh
         cd openwrt && make defconfig
