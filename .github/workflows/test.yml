@@ -28,7 +28,7 @@ env:
   DOCKER_PASSWD: ${{ secrets.DOCKER_PASSWD }}  
 
 jobs:
-  ctc_18.06:
+  ctc-18_06:
     runs-on: Ubuntu-20.04
     if: github.event.repository.owner.id == github.event.sender.id
 
