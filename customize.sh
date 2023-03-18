@@ -12,3 +12,4 @@ sed -i 's/$1$V4UetPzk$CYXluq4wUazHjmCDBCqXF.//g' openwrt/feeds/smpackage/.github
 sed -i 's/$1$V4UetPzk$CYXluq4wUazHjmCDBCqXF.//g' openwrt/package/lean/default-settings/files/zzz-default-settings || true
 #2.2 Edit default-settings file
 sed -i '/kenzo/d' openwrt/feeds/smpackage/.github/diy/default-settings
+sed -i '/hsts=0/d' openwrt/feeds/smpackage/.github/diy/default-settings
