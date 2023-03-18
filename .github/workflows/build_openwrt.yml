@@ -86,10 +86,10 @@ jobs:
         echo "-----------------------"
         ./scripts/feeds update -a
         ./scripts/feeds install -a 
+        cd ..
         echo "======================="
         echo "Configuration Customization ${{matrix.target}}"
         echo "-----------------------"
-        cd ..
         [ -e $CONFIG_FILE ] && mv $CONFIG_FILE openwrt/.config
         chmod +x ./customize.sh && ./customize.sh
         cd openwrt
@@ -118,10 +118,10 @@ jobs:
         echo "-----------------------"
         ./scripts/feeds update -a
         ./scripts/feeds install -a 
+        cd ..
         echo "======================="
         echo "Configuration Customization ${{matrix.target}}"
         echo "-----------------------"
-        cd ..
         [ -e $CONFIG_FILE ] && mv $CONFIG_FILE openwrt/.config
         chmod +x ./customize.sh && ./customize.sh
         cd openwrt && make defconfig
