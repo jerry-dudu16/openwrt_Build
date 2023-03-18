@@ -91,10 +91,6 @@ jobs:
         chmod +x ./customize.sh && ./customize.sh
         cd openwrt
         cp -f feeds/smpackage/.github/diy/default-settings package/emortal/default-settings/files/99-default-settings
-        cp -f feeds/smpackage/.github/diy/banner package/emortal/default-settings/files/openwrt_banner
-        cp -f feeds/smpackage/.github/diy/banner package/base-files/files/etc/banner
-        cp -f feeds/smpackage/.github/diy/index_x86.htm package/emortal/autocore/files/generic/index.htm
-        sed -i "s/%D %V, %C/openwrt $(date +'%m.%d')/g" package/base-files/files/etc/banner
         make defconfig
         
     - name: 下载包文件
@@ -134,7 +130,7 @@ jobs:
         echo "v${{ env.date2 }}" > version.txt
         md5=$((md5sum *squashfs-sysupgrade* || md5sum *squashfs-combined-efi*) | awk '{print $1}') 2>/dev/null
         echo $md5 >> version.txt
-        rename -v "s/^immortalwrt/${{ env.VERSION }}immortalwrt-openwrt/" * || true
+        rename -v "s/^immortalwrt/${{ env.VERSION }}-${{matrix.target}}-openwrt/" * || true
         rename -v "s/friendlyarm_//" *gz || true
         echo $md5 >> version.txt
         echo ${{matrix.target}} >> version.txt     
