@@ -15,8 +15,14 @@ on:
         required: false
         default: 'false'
         
+  push:
+    branches:
+      - main
+    paths:
+      - '*.config'
+        
   schedule:
-    - cron: 0 6 * * 5
+    - cron: 0 6 15,28 * *
 
 env:
   UPLOAD_COWTRANSFER: false
