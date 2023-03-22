@@ -105,7 +105,7 @@ jobs:
       env:
         REPO_URL: https://github.com/coolsnowwolf/lede
         REPO_BRANCH: master
-        CONFIG_FILE: 'leans.config'
+        CONFIG_FILE: 'lean.config'
       run: |
         echo "======================="
         echo "Clone source code"
