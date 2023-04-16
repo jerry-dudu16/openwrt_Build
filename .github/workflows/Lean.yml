@@ -14,15 +14,15 @@ on:
         description: 'SSH connection to Actions'
         required: false
         default: 'false'
-        
+  schedule:
+   - cron: 0 6 15,28 * *
   #push:
   #  branches:
   #    - main
   #  paths:
   #    - '*.config'
         
-  #schedule:
-  #  - cron: 0 6 15,28 * *
+
 
 env:
   UPLOAD_COWTRANSFER: false
@@ -97,8 +97,7 @@ jobs:
       run: |
         [ -e $CONFIG_FILE ] && mv $CONFIG_FILE openwrt/.config
         chmod +x ./customize.sh && ./customize.sh
-        cd openwrt
-        cp -f feeds/smpackage/.github/diy/${{matrix.target}}.config .config && make defconfig
+        cd openwrt && make defconfig
         
     - name: 下载包文件
       working-directory: ./openwrt
@@ -118,26 +117,30 @@ jobs:
       run: |
         echo "======================="
         echo "Space usage:"
+        cd openwrt
         df -h
+        cd ..
         echo "======================="
         echo "Prepare artifact"
         echo "-----------------------"
         mkdir -p firmware/package
         mv -f openwrt/bin/targets/*/*/{*combined*,*sysupgrade*} ./firmware/ 2>/dev/null || true
-        cp openwrt/.config  ./firmware/${{matrix.target}}.config
-        cp openwrt/build_dir/target-*/linux-*/linux-*/.config ./firmware/${{matrix.target}}_kernel.config
+        cp ./openwrt/.config  ./firmware/${{matrix.target}}.config
+        cp ./openwrt/build_dir/target-*/linux-*/linux-*/.config ./firmware/${{matrix.target}}_kernel.config
         rm -rf $(find ./openwrt/bin/targets/ -type d -name "packages")
         cp -rf $(find ./openwrt/bin/packages/ -type f -name "*.ipk") ./firmware/package/
         cd firmware
         echo "v${{ env.date2 }}" > version.txt
         md5=$((md5sum *squashfs-sysupgrade* || md5sum *squashfs-combined-efi*) | awk '{print $1}') 2>/dev/null
         echo $md5 >> version.txt
+        rename -v "s/^immortalwrt/${{ env.VERSION }}-${{matrix.target}}-openwrt/" * || true
         rename -v "s/^openwrt/${{ env.VERSION }}-${{matrix.target}}-openwrt/" * || true
         rename -v "s/friendlyarm_//" *gz || true
         echo $md5 >> version.txt
-        echo ${{matrix.target}} >> version.txt
+        echo ${{matrix.target}} >> version.txt     
         rm -rf sha256sums
-        echo "FIRMWARE=$PWD" >> $GITHUB_ENV
+        echo "FIRMWARE=$PWD" >> $GITHUB_ENV          
+        echo "======================="
 
     - name: 上传固件目录
       uses: actions/upload-artifact@main
