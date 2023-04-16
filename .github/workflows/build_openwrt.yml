@@ -21,8 +21,8 @@ on:
     paths:
       - '*.config'
         
-  schedule:
-    - cron: 0 6 15,28 * *
+#  schedule:
+#    - cron: 0 6 15,28 * *
 
 env:
   UPLOAD_COWTRANSFER: false
