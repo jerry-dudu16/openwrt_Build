@@ -35,15 +35,8 @@ env:
   DOCKER_PASSWD: ${{ secrets.DOCKER_PASSWD }}  
 
 jobs:
-  merge:
-    runs-on: Ubuntu-22.04
-    if: github.event.repository.owner.id == github.event.sender.id
-
-    name: Build Lean
-    strategy:
-      fail-fast: false
-      matrix:
-        target: [Lean]
+  build:
+    runs-on: ubuntu-latest
     
     steps:
     - name: 检查
@@ -91,7 +84,7 @@ jobs:
         ./scripts/feeds update -a
         ./scripts/feeds install -a
 
-    - name: 自定义配置 ${{matrix.target}}
+    - name: 自定义配置 lean
       env:
         CONFIG_FILE: 'lean.config'
       run: |
@@ -125,19 +118,19 @@ jobs:
         echo "-----------------------"
         mkdir -p firmware/package
         mv -f openwrt/bin/targets/*/*/{*combined*,*sysupgrade*} ./firmware/ 2>/dev/null || true
-        cp ./openwrt/.config  ./firmware/${{matrix.target}}.config
-        cp ./openwrt/build_dir/target-*/linux-*/linux-*/.config ./firmware/${{matrix.target}}_kernel.config
+        cp ./openwrt/.config  ./firmware/lean.config
+        cp ./openwrt/build_dir/target-*/linux-*/linux-*/.config ./firmware/lean_kernel.config
         rm -rf $(find ./openwrt/bin/targets/ -type d -name "packages")
         cp -rf $(find ./openwrt/bin/packages/ -type f -name "*.ipk") ./firmware/package/
         cd firmware
         echo "v${{ env.date2 }}" > version.txt
         md5=$((md5sum *squashfs-sysupgrade* || md5sum *squashfs-combined-efi*) | awk '{print $1}') 2>/dev/null
         echo $md5 >> version.txt
-        rename -v "s/^immortalwrt/${{ env.VERSION }}-${{matrix.target}}-openwrt/" * || true
-        rename -v "s/^openwrt/${{ env.VERSION }}-${{matrix.target}}-openwrt/" * || true
+        rename -v "s/^immortalwrt/${{ env.VERSION }}-lean-openwrt/" * || true
+        rename -v "s/^openwrt/${{ env.VERSION }}-lean-openwrt/" * || true
         rename -v "s/friendlyarm_//" *gz || true
         echo $md5 >> version.txt
-        echo ${{matrix.target}} >> version.txt     
+        echo Lean >> version.txt     
         rm -rf sha256sums
         echo "FIRMWARE=$PWD" >> $GITHUB_ENV          
         echo "======================="
@@ -145,7 +138,7 @@ jobs:
     - name: 上传固件目录
       uses: actions/upload-artifact@main
       with:
-        name: ${{ env.date3 }}_${{matrix.target}}
+        name: ${{ env.date3 }}_lean
         path: ${{ env.FIRMWARE }}   
 
     - name: 上传固件cowtransfer
