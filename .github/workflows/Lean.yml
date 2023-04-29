@@ -39,7 +39,7 @@ jobs:
     runs-on: Ubuntu-22.04
     if: github.event.repository.owner.id == github.event.sender.id
 
-    name: Build ${{matrix.target}}
+    name: Build Lean
     strategy:
       fail-fast: false
       matrix:
