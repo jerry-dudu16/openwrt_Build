@@ -106,7 +106,6 @@ jobs:
 
     - name: 整理文件
       id: organize
-      if: env.UPLOAD_FIRMWARE == 'true' && !cancelled()
       run: |
         echo "======================="
         echo "Space usage:"
