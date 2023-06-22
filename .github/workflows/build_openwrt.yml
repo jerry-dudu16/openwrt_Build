@@ -180,7 +180,7 @@ jobs:
     - name: 上传固件目录
       uses: actions/upload-artifact@main
       with:
-        name: ${{ env.date3 }}_${{matrix.target}}
+        name: ${{ env.date2 }}_${{matrix.target}}
         path: ${{ env.FIRMWARE }}
 
     - name: 上传固件cowtransfer
