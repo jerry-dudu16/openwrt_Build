@@ -85,8 +85,8 @@ jobs:
         ./scripts/feeds install -a
 
     - name: 自定义配置 ${{ env.BUILD_FIRMWARE }}
-      env:
-        CONFIG_FILE: 'lean.config'
+      # env:
+      #  CONFIG_FILE: 'lean.config'
       run: |
         [ -e $CONFIG_FILE ] && mv $CONFIG_FILE openwrt/.config
         chmod +x ./customize.sh && ./customize.sh
